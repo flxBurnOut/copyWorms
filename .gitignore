@@ -1,15 +1,62 @@
-# Godot 编辑器缓存和自动生成文件
+# ============================================
+# .gitignore — 本地保留 Godot 源码，远程只推送 web 导出 + 部署配置
+# ============================================
+
+# --- Godot 源码目录（本地保留，不推送到远程） ---
+Assets/
+DataConfig/
+EnemyModule/
+Global/
+LevelModule/
+PlayerModule/
+Resources/
+Scenes/
+Scripts/
+Tools/
+UI/
+
+# --- Godot 项目文件 ---
+project.godot
+project.godot.txt
+export_presets.cfg
+
+# --- 自动生成 ---
+*.import
+*.uid
 .godot/
 
-# 导入文件（自动生成）
-*.import
+# --- 根目录重复的 web 导出文件（正式的在 build/web/） ---
+/index.html
+/index.js
+/index.wasm
+/index.pck
+/index.side.wasm
+/index.audio.worklet.js
+/index.audio.position.worklet.js
+/index.icon.png
+/index.apple-touch-icon.png
+/index.png
 
-# 脚本 UID 文件（自动生成）
-*.uid
+# --- 构建产物（只保留 build/web/） ---
+/build/export.log
+/build/tmpl_install.log
 
-# IDE 配置
+# --- 其他不需要的文件 ---
+push.log
+generated/
+addons/
+AI资源库/
+godot-editor/
+
+# --- IDE / 系统 ---
 .idea/
 .vscode/
+<<<<<<< HEAD
+.codebuddy/
+.godot-mcp/
+.DS_Store
+__MACOSX/
+=======
 
 # Godot 编辑器二进制文件（体积过大，不纳入版本控制）
 godot-editor/
@@ -72,6 +119,7 @@ AI资源库/鬼灭之刃/Gemini_Generated_Image_w0gzdsw0gzdsw0gz_workflow/npc.js
 AI资源库/鬼灭之刃/Gemini_Generated_Image_w0gzdsw0gzdsw0gz_workflow/sprite.png
 
 # Tencent Cloud EdgeOne
+>>>>>>> 7a8957e5414f3ab87f53b40ec69d6ca3be6f0d94
 .env
 .edgeone/*
 .tef_dist/*

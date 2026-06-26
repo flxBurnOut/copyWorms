@@ -1,0 +1,57 @@
+# ============================================
+# Docker 构建忽略文件
+# 只保留 build/web/ + 部署配置，极大减小构建上下文
+# ============================================
+
+# Godot 源码目录
+Assets/
+DataConfig/
+EnemyModule/
+Global/
+LevelModule/
+PlayerModule/
+Resources/
+Scenes/
+Scripts/
+Tools/
+UI/
+
+# Godot 项目配置（不需要在 Docker 镜像中）
+project.godot
+project.godot.txt
+export_presets.cfg
+
+# 文档
+TECHNICAL_ARCHITECTURE_REPORT.md
+WORK_SESSION_SUMMARY.md
+
+# 构建日志
+build/export.log
+build/tmpl_install.log
+
+# 根目录重复的 web 导出文件（正式的在 build/web/ 里）
+# 注意：必须以 / 开头锚定根目录，否则会误杀 build/web/ 下的同名文件！
+/index.html
+/index.js
+/index.wasm
+/index.pck
+/index.side.wasm
+/index.audio.worklet.js
+/index.audio.position.worklet.js
+/index.icon.png
+/index.apple-touch-icon.png
+/index.png
+
+# 其他
+push.log
+*.uid
+.godot/
+.godot-mcp/
+.addons/
+addons/
+.codebuddy/
+.idea/
+.vscode/
+.DS_Store
+.git/
+__MACOSX/

@@ -1,0 +1,28 @@
+# ============================================================
+# CNB 配置：CI 自动构建镜像 + 仅预览模式（点开即玩）
+# ============================================================
+
+# --- CI 流水线：push 到 main 时自动构建并推送 Docker 镜像 ---
+main:
+  push:
+    - stages:
+        - name: build-and-push
+          script: |
+            docker build -t ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}:latest .
+            docker push   ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}:latest
+      services:
+        - docker
+
+# --- 仅预览模式：访客点右上角按钮直接玩游戏，不进 IDE ---
+$:
+  vscode:
+    - runner:
+        cpus: 16
+      services:
+        - docker
+        - name: vscode
+          options:
+            onlyPreview: true
+            launch: docker run -d --network host -e PORT=8686 -e CNB_API_ENDPOINT -e CNB_REPO_SLUG -e CNB_TOKEN docker.cnb.cool/copyworms/hachathondreamweaver:latest
+            keepAliveTimeout: 3600000
+            daemon: true

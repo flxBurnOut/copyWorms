@@ -1,0 +1,5 @@
+workspace:
+  launch:
+    button:
+      name: 🎮 开始游戏
+      description: 黑客松 2D 横版动作游戏 - 点击立即试玩

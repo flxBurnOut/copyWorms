@@ -1,2 +1,8 @@
 # Normalize EOL for all files that Git considers text files.
 * text=auto eol=lf
+<<<<<<< HEAD
+build/web/index.pck filter=lfs diff=lfs merge=lfs -text
+build/web/index.wasm filter=lfs diff=lfs merge=lfs -text
+build/web/index.side.wasm filter=lfs diff=lfs merge=lfs -text
+=======
+>>>>>>> 7a8957e5414f3ab87f53b40ec69d6ca3be6f0d94
