@@ -117,7 +117,6 @@ func _setup_player() -> void:
 
 func _on_ready() -> void:
 	super._on_ready()
-	GameUIStyle.set_ui_theme(GameUIStyle.UI_THEME_LINGNAN)
 
 	# 入场黑屏遮罩（初始化在黑屏下进行，末尾淡出呈现关卡）
 	_play_intro_fade_in()
@@ -459,7 +458,6 @@ func _restore_combat_mechanics() -> void:
 func _swap_player_to_cyber() -> void:
 	var old_player = GameManager.player_ref
 	if not old_player or not is_instance_valid(old_player): return
-	GameUIStyle.set_ui_theme(GameUIStyle.UI_THEME_CYBER)
 
 	var saved_facing_right: bool = old_player.is_facing_right
 
@@ -672,26 +670,15 @@ func _show_narrative(text: String, callback: Callable = Callable()) -> void:
 	_narrative_open = true
 	GameManager.is_dialog_active = true
 	_freeze_player(true)
-	var pages := GameUIStyle.paginate_interaction_text(text)
-	var page_index := 0
 	if _narrative_panel:
-		if _narrative_text:
-			GameUIStyle.fit_interaction_text_panel(_narrative_panel, _narrative_text, pages[page_index])
 		_narrative_panel.show()
+		if _narrative_text: _narrative_text.text = text
 	await get_tree().create_timer(0.3).timeout
 	_narrative_enter_pressed = false
 	var wait_elapsed: float = 0.0
 	var wait_delta: float = 0.05
 	while _narrative_open and wait_elapsed < NARRATIVE_INPUT_TIMEOUT:
-		if _narrative_enter_pressed:
-			if page_index < pages.size() - 1:
-				page_index += 1
-				_narrative_enter_pressed = false
-				wait_elapsed = 0.0
-				if _narrative_panel and _narrative_text:
-					GameUIStyle.fit_interaction_text_panel(_narrative_panel, _narrative_text, pages[page_index])
-			else:
-				break
+		if _narrative_enter_pressed: break
 		await get_tree().create_timer(wait_delta).timeout
 		wait_elapsed += wait_delta
 	if _narrative_panel: _narrative_panel.hide()

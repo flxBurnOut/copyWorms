@@ -141,8 +141,8 @@ func _trigger_ending() -> void:
 	# 显示文本框
 	if not _dialog_panel:
 		_create_dialog_panel()
-	GameUIStyle.fit_interaction_text_panel(_dialog_panel, _dialog_label, "太阳照常升起")
 	_dialog_panel.visible = true
+	_dialog_label.text = "太阳照常升起"
 	# 同时开始5s黑屏渐入
 	var cv = CanvasLayer.new()
 	cv.name = "FadeCanvas"
@@ -169,8 +169,24 @@ func _create_dialog_panel() -> void:
 	cv.layer = 50
 	add_child(cv)
 	_dialog_panel = Panel.new()
+	_dialog_panel.position = Vector2(240, 520)
+	_dialog_panel.size = Vector2(800, 140)
 	_dialog_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0, 0, 0, 0.85)
+	style.set_corner_radius_all(8)
+	style.content_margin_left = 20
+	style.content_margin_right = 20
+	style.content_margin_top = 16
+	style.content_margin_bottom = 16
+	_dialog_panel.add_theme_stylebox_override("panel", style)
 	cv.add_child(_dialog_panel)
 	_dialog_label = RichTextLabel.new()
+	_dialog_label.bbcode_enabled = true
+	_dialog_label.fit_content = true
+	_dialog_label.position = Vector2(20, 16)
+	_dialog_label.size = Vector2(760, 108)
+	_dialog_label.add_theme_font_size_override("normal_font_size", 33)
+	_dialog_label.add_theme_color_override("default_color", Color(0.95, 0.9, 0.8))
+	_dialog_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_dialog_panel.add_child(_dialog_label)
-	GameUIStyle.apply_interaction_text_panel(_dialog_panel, _dialog_label, 33)

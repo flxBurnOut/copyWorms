@@ -186,7 +186,6 @@ const CODE_SCROLL_LINES: Array[String] = [
 
 func _on_ready() -> void:
 	super._on_ready()
-	GameUIStyle.set_ui_theme(GameUIStyle.UI_THEME_DEFAULT)
 
 	if not level_config:
 		level_config = load("res://DataConfig/Level/Level01Config.tres") as LevelConfig
@@ -618,12 +617,9 @@ func _show_narrative(text: String, callback: Callable = Callable()) -> void:
 	_is_interacting = true
 	_narrative_open = true
 	_freeze_player(true)
-	var pages := GameUIStyle.paginate_interaction_text(text)
-	var page_index := 0
 	if _narrative_panel:
-		if _narrative_text:
-			GameUIStyle.fit_interaction_text_panel(_narrative_panel, _narrative_text, pages[page_index])
 		_narrative_panel.show()
+		if _narrative_text: _narrative_text.text = text
 	await get_tree().create_timer(0.3).timeout
 
 	# B6 修复: 加超时等待，防止失焦或无键盘时永久卡死
@@ -634,14 +630,7 @@ func _show_narrative(text: String, callback: Callable = Callable()) -> void:
 	var wait_delta: float = 0.05  # 缩短轮询间隔到 50ms，提升响应灵敏度
 	while _narrative_open and wait_elapsed < NARRATIVE_INPUT_TIMEOUT:
 		if _narrative_enter_pressed:
-			if page_index < pages.size() - 1:
-				page_index += 1
-				_narrative_enter_pressed = false
-				wait_elapsed = 0.0
-				if _narrative_panel and _narrative_text:
-					GameUIStyle.fit_interaction_text_panel(_narrative_panel, _narrative_text, pages[page_index])
-			else:
-				break
+			break
 		await get_tree().create_timer(wait_delta).timeout
 		wait_elapsed += wait_delta
 

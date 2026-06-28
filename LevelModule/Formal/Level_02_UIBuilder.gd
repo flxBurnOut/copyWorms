@@ -41,10 +41,27 @@ func _build_narrative_panel() -> void:
 	panel.offset_bottom = 0.0
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0, 0, 0, 0.85)
+	style.set_corner_radius_all(8)
+	panel.add_theme_stylebox_override("panel", style)
+
 	var label = RichTextLabel.new()
 	label.name = "RichTextLabel"
+	label.anchor_left = 0.0
+	label.anchor_top = 0.0
+	label.anchor_right = 1.0
+	label.anchor_bottom = 1.0
+	label.offset_left = 20.0
+	label.offset_top = 20.0
+	label.offset_right = -20.0
+	label.offset_bottom = -20.0
+	label.bbcode_enabled = true
+	label.fit_content = true
+	label.add_theme_font_size_override("normal_font_size", 27)
+	label.add_theme_color_override("default_color", Color(0.9, 0.85, 0.75))
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	panel.add_child(label)
-	GameUIStyle.apply_interaction_text_panel(panel, label, 27)
 	level._narrative_text = label
 
 	canvas.add_child(panel)

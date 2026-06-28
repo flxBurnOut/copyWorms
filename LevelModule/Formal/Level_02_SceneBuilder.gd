@@ -27,7 +27,6 @@ func _build_dream_world() -> void:
 	_ensure_static_body(collision_container, "MainAtticFloor", Vector2(212, 620), Vector2(424, 40))
 	_ensure_static_body(collision_container, "AtticLeftWall", Vector2(-10, 360), Vector2(20, 720))
 	level._attic_door_wall = _ensure_static_body(collision_container, "AtticDoorWall", Vector2(424, 424), Vector2(30, 400))
-	_attach_barrier_shader(level._attic_door_wall)
 
 	# ---- B 老街 (424-5328) ----
 	_ensure_static_body(collision_container, "StreetGround", Vector2(2876, 620), Vector2(4904, 40))
@@ -58,7 +57,7 @@ func _build_interactives() -> void:
 	var door_indicator = level._attic_door_node.get_node_or_null("Indicator")
 	if door_indicator:
 		door_indicator.queue_free()
-	level._attic_door_node.prompt_text = "这个结界....触摸他会怎么样"
+	level._attic_door_node.prompt_text = "按 Enter 推开"
 
 	level._rattan_chair_node = _ensure_interactive(container, "GroceryStore", "rattan_chair", Vector2(880, 552), Vector2(80, 50))
 	var chair_indicator = level._rattan_chair_node.get_node_or_null("Indicator")
@@ -156,29 +155,3 @@ func _ensure_trigger_zone(container: Node, zone_name: String, pos: Vector2, size
 	area = _create_trigger_zone(zone_name, pos, size)
 	container.add_child(area)
 	return area
-
-func _attach_barrier_shader(wall: StaticBody2D) -> void:
-	if not wall or not is_instance_valid(wall):
-		return
-	if wall.get_node_or_null("BarrierVisual"):
-		return
-	var shader_res = load("res://LevelModule/Formal/warning_barrier.gdshader")
-	if not shader_res:
-		return
-	var col_shape = wall.get_node_or_null("CollisionShape2D") as CollisionShape2D
-	if not col_shape or not (col_shape.shape is RectangleShape2D):
-		return
-	var rect_size = (col_shape.shape as RectangleShape2D).size
-	var mat := ShaderMaterial.new()
-	mat.shader = shader_res
-	mat.set_shader_parameter("intensity", 1.8)
-	mat.set_shader_parameter("alert_level", 1.0)
-	mat.set_shader_parameter("barrier_color", Color(0.04, 0.12, 0.7, 1.0))
-	mat.set_shader_parameter("fade", 1.0)
-	var cr := ColorRect.new()
-	cr.name = "BarrierVisual"
-	cr.size = rect_size
-	cr.position = col_shape.position - rect_size / 2.0
-	cr.material = mat
-	cr.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	wall.add_child(cr)
