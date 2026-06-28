@@ -215,7 +215,10 @@ size = Vector2(36.5, 412.75)
 size = Vector2(30.5, 686.5)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ei20x"]
-size = Vector2(24, 100)
+size = Vector2(30.25, 100)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pjd0w"]
+size = Vector2(2616, 20)
 
 [node name="Level_04" type="Node2D" unique_id=81654247]
 script = ExtResource("1_script")
@@ -944,7 +947,7 @@ shape = SubResource("RectangleShape2D_y2mcw")
 [node name="StaticBody2D2" type="StaticBody2D" parent="." unique_id=1302876374]
 
 [node name="CollisionShape2D2" type="CollisionShape2D" parent="StaticBody2D2" unique_id=845496823]
-position = Vector2(1848, 1411)
+position = Vector2(1836.75, 1411)
 shape = SubResource("RectangleShape2D_ei20x")
 
 [node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=435195675]
@@ -953,3 +956,15 @@ shape = SubResource("RectangleShape2D_ei20x")
 position = Vector2(1604, 1537)
 scale = Vector2(1, 2.225)
 shape = SubResource("s2c_block")
+
+[node name="StaticBody2D5" type="StaticBody2D" parent="." unique_id=246382083]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D5" unique_id=793993797]
+position = Vector2(2065, 905)
+shape = SubResource("RectangleShape2D_pjd0w")
+
+[node name="StaticBody2D6" type="StaticBody2D" parent="." unique_id=1444502426]
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="StaticBody2D6" unique_id=50177554]
+position = Vector2(2512.125, 1308)
+shape = SubResource("RectangleShape2D_ei20x")
