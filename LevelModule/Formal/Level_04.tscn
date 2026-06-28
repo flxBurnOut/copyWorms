@@ -272,7 +272,6 @@ shape = SubResource("r3")
 position = Vector2(1537, 193)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Stage1Collisions/P_Y190_R" unique_id=981458435]
-position = Vector2(-1, 15)
 shape = SubResource("r4")
 
 [node name="P_Ym164" type="StaticBody2D" parent="Stage1Collisions" unique_id=38951055]

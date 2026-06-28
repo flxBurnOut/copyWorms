@@ -50,7 +50,6 @@ func _setup_player() -> void:
 
 func _on_ready() -> void:
 	super._on_ready()
-	GameUIStyle.set_ui_theme(GameUIStyle.UI_THEME_LINGNAN)
 
 	_bind_spawn_point()
 	_build_collision_bodies()

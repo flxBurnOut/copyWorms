@@ -47,8 +47,8 @@ func _build_ui() -> void:
 	title.text = "按键设置"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 42)
-	title.add_theme_color_override("font_color", _title_color())
-	title.position = Vector2(460, 150)
+	title.add_theme_color_override("font_color", Color.WHITE)
+	title.position = Vector2(460, 102)
 	title.size = Vector2(500, 46)
 	add_child(title)
 
@@ -57,21 +57,21 @@ func _build_ui() -> void:
 	hint.text = "点击 [修改] 后按下新按键，ESC 取消"
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint.add_theme_font_size_override("font_size", 21)
-	hint.add_theme_color_override("font_color", _hint_color())
-	hint.position = Vector2(420, 198)
+	hint.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+	hint.position = Vector2(420, 146)
 	hint.size = Vector2(580, 26)
 	add_child(hint)
 
 	# 滚动区域
 	var scroll := ScrollContainer.new()
-	scroll.position = Vector2(350, 246)
-	scroll.size = Vector2(720, 246)
+	scroll.position = Vector2(330, 194)
+	scroll.size = Vector2(780, 320)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	add_child(scroll)
 
 	_list_vbox = VBoxContainer.new()
 	_list_vbox.name = "ActionList"
-	_list_vbox.add_theme_constant_override("separation", 8)
+	_list_vbox.add_theme_constant_override("separation", 6)
 	scroll.add_child(_list_vbox)
 
 	# 构建每行动作
@@ -79,11 +79,11 @@ func _build_ui() -> void:
 		_add_action_row(action)
 
 	# 底部按钮
-	var reset_btn := _make_btn("恢复默认", Vector2(500, 512), Vector2(182, 54), true, 29)
+	var reset_btn := _make_btn("恢复默认", Vector2(510, 540), Vector2(180, 54), true, 31)
 	reset_btn.pressed.connect(_on_reset_pressed)
 	add_child(reset_btn)
 
-	var back_btn := _make_btn("返回", Vector2(738, 512), Vector2(182, 54), true, 29)
+	var back_btn := _make_btn("返回", Vector2(730, 540), Vector2(180, 54), true, 31)
 	back_btn.pressed.connect(_on_back_pressed)
 	add_child(back_btn)
 
@@ -99,33 +99,30 @@ func _make_btn(text: String, pos: Vector2, size: Vector2, force_simple: bool = f
 	lbl.text = text
 	lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	btn.add_child(lbl)
-	if GameUIStyle.is_lingnan_theme():
-		GameUIStyle.apply_lingnan_pressed_texture_button(btn, font_size)
-	else:
-		GameUIStyle.apply_texture_button(btn, font_size, force_simple)
+	GameUIStyle.apply_texture_button(btn, font_size, force_simple)
 	return btn
 
 func _add_action_row(action: StringName) -> void:
 	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 22)
+	row.add_theme_constant_override("separation", 20)
 
 	# 动作名称
 	var name_label := Label.new()
 	name_label.text = KeybindManager.get_action_display_name(action)
-	name_label.custom_minimum_size = Vector2(115, 38)
-	name_label.add_theme_font_size_override("font_size", 23)
-	name_label.add_theme_color_override("font_color", _name_color())
+	name_label.custom_minimum_size = Vector2(100, 38)
+	name_label.add_theme_font_size_override("font_size", 24)
+	name_label.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9))
 	row.add_child(name_label)
 
 	# 当前绑定显示
 	var bind_label := Label.new()
-	bind_label.custom_minimum_size = Vector2(390, 38)
-	bind_label.add_theme_font_size_override("font_size", 21)
-	bind_label.add_theme_color_override("font_color", _binding_color())
+	bind_label.custom_minimum_size = Vector2(400, 38)
+	bind_label.add_theme_font_size_override("font_size", 22)
+	bind_label.add_theme_color_override("font_color", Color(0.65, 0.82, 1.0))
 	row.add_child(bind_label)
 
 	# 修改按钮
-	var rebind_btn := _make_btn("修改", Vector2.ZERO, Vector2(132, 46), true, 25)
+	var rebind_btn := _make_btn("修改", Vector2.ZERO, Vector2(118, 44), true, 29)
 	rebind_btn.pressed.connect(_on_rebind_pressed.bind(action))
 	row.add_child(rebind_btn)
 
@@ -146,21 +143,6 @@ func _update_binding_display(action: StringName) -> void:
 		texts.append(KeybindManager.get_event_display_text(ev))
 	bind_label.text = ", ".join(texts) if texts.size() > 0 else "未绑定"
 
-func _title_color() -> Color:
-	return Color(0.1, 0.18, 0.13) if GameUIStyle.is_lingnan_theme() else Color.WHITE
-
-func _hint_color() -> Color:
-	return Color(0.38, 0.34, 0.28) if GameUIStyle.is_lingnan_theme() else Color(0.6, 0.6, 0.6)
-
-func _name_color() -> Color:
-	return Color(0.12, 0.17, 0.12) if GameUIStyle.is_lingnan_theme() else Color(0.9, 0.9, 0.9)
-
-func _binding_color() -> Color:
-	return Color(0.12, 0.33, 0.24) if GameUIStyle.is_lingnan_theme() else Color(0.65, 0.82, 1.0)
-
-func _listening_color() -> Color:
-	return Color(0.72, 0.36, 0.12) if GameUIStyle.is_lingnan_theme() else Color(1.0, 0.9, 0.3)
-
 ## ================================================================
 ##  监听模式
 ## ================================================================
@@ -174,7 +156,7 @@ func _on_rebind_pressed(action: StringName) -> void:
 	if not row_data.is_empty():
 		var bind_label: Label = row_data["label"]
 		bind_label.text = "< 请按键... (ESC取消) >"
-		bind_label.add_theme_color_override("font_color", _listening_color())
+		bind_label.add_theme_color_override("font_color", Color(1.0, 0.9, 0.3))
 		var rebind_btn: TextureButton = row_data["button"]
 		GameUIStyle.set_texture_button_disabled(rebind_btn, true)
 	# 屏蔽游戏输入，防止按键被游戏消费
@@ -240,7 +222,7 @@ func _finish_listening() -> void:
 	var row_data: Dictionary = _action_rows.get(_listening_action, {})
 	if not row_data.is_empty():
 		var bind_label: Label = row_data["label"]
-		bind_label.add_theme_color_override("font_color", _binding_color())
+		bind_label.add_theme_color_override("font_color", Color(0.65, 0.82, 1.0))
 		var rebind_btn: TextureButton = row_data["button"]
 		GameUIStyle.set_texture_button_disabled(rebind_btn, false)
 	_listening_action = &""

@@ -63,7 +63,6 @@ var _combat_hint_shown: bool = false       # 提示是否已显示
 
 func _on_ready() -> void:
 	super._on_ready()
-	GameUIStyle.set_ui_theme(GameUIStyle.UI_THEME_LINGNAN)
 
 	if not level_config:
 		level_config = load("res://DataConfig/Level/Level02Config.tres") as LevelConfig
@@ -399,12 +398,10 @@ func _show_narrative(text: String, callback: Callable = Callable()) -> void:
 	_is_interacting = true
 	_narrative_open = true
 	_freeze_player(true)
-	var pages := GameUIStyle.paginate_interaction_text(text)
-	var page_index := 0
 	if _narrative_panel:
-		if _narrative_text:
-			GameUIStyle.fit_interaction_text_panel(_narrative_panel, _narrative_text, pages[page_index])
 		_narrative_panel.show()
+		if _narrative_text:
+			_narrative_text.text = text
 	await get_tree().create_timer(0.3).timeout
 
 	_narrative_enter_pressed = false
@@ -412,14 +409,7 @@ func _show_narrative(text: String, callback: Callable = Callable()) -> void:
 	var wait_delta: float = 0.05
 	while _narrative_open and wait_elapsed < NARRATIVE_INPUT_TIMEOUT:
 		if _narrative_enter_pressed:
-			if page_index < pages.size() - 1:
-				page_index += 1
-				_narrative_enter_pressed = false
-				wait_elapsed = 0.0
-				if _narrative_panel and _narrative_text:
-					GameUIStyle.fit_interaction_text_panel(_narrative_panel, _narrative_text, pages[page_index])
-			else:
-				break
+			break
 		await get_tree().create_timer(wait_delta).timeout
 		wait_elapsed += wait_delta
 
@@ -446,8 +436,8 @@ func _show_narrative_sequence(texts: Array[String], callback: Callable = Callabl
 	_is_interacting = true
 	_narrative_open = true
 	_freeze_player(true)
-	if _narrative_panel and _narrative_text:
-		GameUIStyle.fit_interaction_text_panel(_narrative_panel, _narrative_text, texts[0])
+	if _narrative_text:
+		_narrative_text.text = texts[0]
 	if _narrative_panel:
 		_narrative_panel.show()
 	await get_tree().create_timer(0.3).timeout
@@ -455,8 +445,8 @@ func _show_narrative_sequence(texts: Array[String], callback: Callable = Callabl
 	for i in range(texts.size()):
 		if not _narrative_open:
 			break
-		if i > 0 and _narrative_panel and _narrative_text:
-			GameUIStyle.fit_interaction_text_panel(_narrative_panel, _narrative_text, texts[i])
+		if i > 0 and _narrative_text:
+			_narrative_text.text = texts[i]
 		await _wait_for_narrative_advance()
 
 	if _narrative_panel:
@@ -505,7 +495,7 @@ func _transition_attic_to_street() -> void:
 	if _transition_running or not level_data:
 		return
 	_mark_interaction_completed("attic_door")
-	_do_attic_door_transition()
+	_show_narrative(level_data.attic_door_text, func(): _do_attic_door_transition())
 
 func _handle_chips_cat_interaction() -> void:
 	if _chips_cat_node and _chips_cat_node.completed:

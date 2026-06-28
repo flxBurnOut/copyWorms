@@ -65,7 +65,6 @@ func _setup_player() -> void:
 
 func _on_ready() -> void:
 	super._on_ready()
-	GameUIStyle.set_ui_theme(GameUIStyle.UI_THEME_LINGNAN)
 
 	_bind_spawn_point()
 	_setup_camera_limits()
@@ -219,14 +218,30 @@ func _build_narrative_ui() -> void:
 		_narrative_panel.offset_right = 0.0
 		_narrative_panel.offset_bottom = 0.0
 		_narrative_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var style = StyleBoxFlat.new()
+		style.bg_color = Color(0, 0, 0, 0.85)
+		style.set_corner_radius_all(8)
+		_narrative_panel.add_theme_stylebox_override("panel", style)
 		canvas.add_child(_narrative_panel)
 
 	_narrative_text = _narrative_panel.get_node_or_null("RichTextLabel") as RichTextLabel
 	if not _narrative_text:
 		_narrative_text = RichTextLabel.new()
 		_narrative_text.name = "RichTextLabel"
+		_narrative_text.anchor_left = 0.0
+		_narrative_text.anchor_top = 0.0
+		_narrative_text.anchor_right = 1.0
+		_narrative_text.anchor_bottom = 1.0
+		_narrative_text.offset_left = 20.0
+		_narrative_text.offset_top = 20.0
+		_narrative_text.offset_right = -20.0
+		_narrative_text.offset_bottom = -20.0
+		_narrative_text.bbcode_enabled = true
+		_narrative_text.fit_content = true
+		_narrative_text.add_theme_font_size_override("normal_font_size", 27)
+		_narrative_text.add_theme_color_override("default_color", Color(0.9, 0.85, 0.75))
+		_narrative_text.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_narrative_panel.add_child(_narrative_text)
-	GameUIStyle.apply_interaction_text_panel(_narrative_panel, _narrative_text, 27)
 
 
 func _show_intro_narrative() -> void:
@@ -242,12 +257,10 @@ func _show_narrative(text: String) -> void:
 		_narrative_open = false
 	_narrative_open = true
 	_freeze_player(true)
-	var pages := GameUIStyle.paginate_interaction_text(text)
-	var page_index := 0
 	if _narrative_panel:
-		if _narrative_text:
-			GameUIStyle.fit_interaction_text_panel(_narrative_panel, _narrative_text, pages[page_index])
 		_narrative_panel.show()
+	if _narrative_text:
+		_narrative_text.text = text
 	await get_tree().create_timer(0.3).timeout
 
 	_narrative_enter_pressed = false
@@ -255,14 +268,7 @@ func _show_narrative(text: String) -> void:
 	const WAIT_DELTA: float = 0.05
 	while _narrative_open and wait_elapsed < NARRATIVE_INPUT_TIMEOUT:
 		if _narrative_enter_pressed:
-			if page_index < pages.size() - 1:
-				page_index += 1
-				_narrative_enter_pressed = false
-				wait_elapsed = 0.0
-				if _narrative_panel and _narrative_text:
-					GameUIStyle.fit_interaction_text_panel(_narrative_panel, _narrative_text, pages[page_index])
-			else:
-				break
+			break
 		await get_tree().create_timer(WAIT_DELTA).timeout
 		wait_elapsed += WAIT_DELTA
 

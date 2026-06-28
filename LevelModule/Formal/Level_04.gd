@@ -125,7 +125,6 @@ func _setup_player() -> void:
 func _swap_player_skin(skin: String) -> void:
 	var old = GameManager.player_ref
 	if not old or not is_instance_valid(old): return
-	GameUIStyle.set_ui_theme(GameUIStyle.UI_THEME_LINGNAN if skin == "Lingnan" else GameUIStyle.UI_THEME_CYBER)
 	var h = old.current_health; var m = old.max_health
 	var f = old.is_facing_right; var pos = old.global_position
 	# 先断开旧玩家信号
@@ -157,7 +156,6 @@ func _swap_player_skin(skin: String) -> void:
 
 func _on_ready() -> void:
 	super._on_ready()
-	GameUIStyle.set_ui_theme(GameUIStyle.UI_THEME_CYBER)
 	# 入场黑屏遮罩（初始化在黑屏下进行，末尾淡出呈现关卡）
 	_play_intro_fade_in()
 	if not level_config: level_config = load("res://DataConfig/Level/Level04Config.tres") as LevelConfig; _apply_config()
@@ -540,15 +538,7 @@ func _show_narrative(text: String, cb: Callable = Callable()) -> void:
 	_narrative_enter_pressed = false
 	var w: float = 0.0
 	while _narrative_open and w < NARRATIVE_INPUT_TIMEOUT:
-		if _narrative_enter_pressed:
-			if page_index < pages.size() - 1:
-				page_index += 1
-				_narrative_enter_pressed = false
-				w = 0.0
-				if _narrative_panel and _narrative_text:
-					GameUIStyle.fit_interaction_text_panel(_narrative_panel, _narrative_text, pages[page_index])
-			else:
-				break
+		if _narrative_enter_pressed: break
 		await get_tree().create_timer(0.05).timeout; w += 0.05
 	_narrative_panel.hide(); _freeze_player(false)
 	_narrative_open = false; GameManager.is_dialog_active = false; _is_interacting = false
@@ -829,10 +819,8 @@ func _stop_stage2_alarm() -> void:
 # ============================================================
 
 func _build_erosion_ui() -> void:
-	var hud = get_node_or_null("HUD")
-	if not hud:
-		call_deferred("_build_erosion_ui")
-		return
+	var cv = get_node_or_null("CanvasLayerUI")
+	if not cv: return
 
 	# ---- 侵蚀进度条容器 ----
 	var container = Control.new()
@@ -840,7 +828,8 @@ func _build_erosion_ui() -> void:
 	container.position = Vector2(20, 105)
 	container.size = Vector2(280, 28)
 	container.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	hud.add_child(container)
+	container.z_index = 130
+	cv.add_child(container)
 
 	# 背景
 	_erosion_bar_bg = ColorRect.new()
@@ -885,9 +874,7 @@ func _build_erosion_ui() -> void:
 		mat.shader = shader
 		mat.set_shader_parameter("intensity", 0.0)
 		_erosion_vignette.material = mat
-	var cv = get_node_or_null("CanvasLayerUI")
-	if cv:
-		cv.add_child(_erosion_vignette)
+	cv.add_child(_erosion_vignette)
 
 func _update_erosion_ui() -> void:
 	if not _erosion_bar_fill or not _erosion_label: return
