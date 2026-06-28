@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://cut01rfjxrchu" path="res://Assets/Sprites/boss_huadan/boss攻击.png" id="tex_attack"]
 [ext_resource type="Texture2D" uid="uid://gmd1ma47j5w6" path="res://Assets/Sprites/boss_huadan/boss待机.png" id="tex_idle"]
 [ext_resource type="Texture2D" uid="uid://bjj4tgqjhhly7" path="res://Assets/Sprites/boss_huadan/boss行走.png" id="tex_walk"]
+[ext_resource type="Texture2D" path="res://Assets/Sprites/boss_huadan/boss悬空.png" id="tex_hover"]
 
 [sub_resource type="AtlasTexture" id="attack_0"]
 atlas = ExtResource("tex_attack")
@@ -153,6 +154,10 @@ region = Rect2(128, 256, 128, 128)
 atlas = ExtResource("tex_walk")
 region = Rect2(256, 256, 128, 128)
 
+[sub_resource type="AtlasTexture" id="hover_0"]
+atlas = ExtResource("tex_hover")
+region = Rect2(0, 0, 1024, 1024)
+
 [sub_resource type="SpriteFrames" id="sprite_frames"]
 animations = [{
 "frames": [{
@@ -248,6 +253,14 @@ animations = [{
 "loop": true,
 "name": &"idle",
 "speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("hover_0")
+}],
+"loop": true,
+"name": &"hang_in_air",
+"speed": 1.0
 }, {
 "frames": [{
 "duration": 1.0,

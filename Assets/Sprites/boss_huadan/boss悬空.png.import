@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b6h7v420t6kvn"
-path="res://.godot/imported/lingnan_dialog_panel.png-c6a8ec9a702923e872cc0029d6868603.ctex"
+uid="uid://c6pbl5k1ta5h2"
+path="res://.godot/imported/boss悬空.png-c166cbf28bc0c10b80a026afe3a0f06e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/UI/Lingnan/lingnan_dialog_panel.png"
-dest_files=["res://.godot/imported/lingnan_dialog_panel.png-c6a8ec9a702923e872cc0029d6868603.ctex"]
+source_file="res://Assets/Sprites/boss_huadan/boss悬空.png"
+dest_files=["res://.godot/imported/boss悬空.png-c166cbf28bc0c10b80a026afe3a0f06e.ctex"]
 
 [params]
 

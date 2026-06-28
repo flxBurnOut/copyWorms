@@ -23,7 +23,6 @@ var _transitioned: bool = false
 var _web_quit_hint: Label = null
 
 func _ready() -> void:
-	GameUIStyle.set_ui_theme(GameUIStyle.UI_THEME_CYBER)
 	print("[TitleScreen] 标题画面加载")
 	# 标题界面播放结局主题音乐
 	MusicManager.restart_bgm("res://Assets/Music/lv5-end.ogg")

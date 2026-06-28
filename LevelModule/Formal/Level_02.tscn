@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://brxg77tciqru"]
 
-[ext_resource type="Script" uid="uid://dcg37hnjxpjqx" path="res://LevelModule/Formal/Level_02.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://blmncx8dp3vli" path="res://LevelModule/Formal/Level_02.gd" id="1_script"]
 [ext_resource type="Resource" uid="uid://l3hmrf4ux81n" path="res://DataConfig/Level/Level02Config.tres" id="2_config"]
 [ext_resource type="Resource" uid="uid://b1s4igaiqss34" path="res://LevelModule/Backup/Level_02_CliffReality/snapshots/Level02Data.tres" id="3_data"]
 [ext_resource type="PackedScene" path="res://LevelModule/Scenes/PixelworkMapStitch/Level 2/2D__2026-06-14T09-34-36-404Z_20260616_150503_986.tscn" id="4_2inj4"]
@@ -13,7 +13,7 @@ size = Vector2(424, 40)
 size = Vector2(20, 720)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_attic_door_wall"]
-size = Vector2(23, 1032)
+size = Vector2(30, 400)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_street_ground"]
 size = Vector2(4904, 40)
@@ -64,7 +64,6 @@ position = Vector2(424, 424)
 collision_mask = 0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="DreamWorldRoot/CollisionBodies/AtticDoorWall" unique_id=210924140]
-position = Vector2(3.5, -316)
 shape = SubResource("RectangleShape2D_attic_door_wall")
 
 [node name="StreetGround" type="StaticBody2D" parent="DreamWorldRoot/CollisionBodies" unique_id=941844803]

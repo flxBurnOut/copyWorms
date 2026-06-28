@@ -15,6 +15,7 @@ var enemy_list: Array[Node2D] = []
 # 游戏状态
 var is_paused: bool = false
 var is_game_over: bool = false
+var is_dialog_active: bool = false  # 对话/叙事期间为true，敌人不可锁定玩家
 
 # 跨关卡梦境运行时配置（关卡2"配置篡改"谜题写入，关卡3读取应用）
 # 例: { "player_damage_reduction": true, "base_jump_height": 99,

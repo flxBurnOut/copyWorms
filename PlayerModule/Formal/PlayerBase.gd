@@ -491,7 +491,7 @@ func _handle_dead(delta: float) -> void:
 # ---- 动作 ----
 
 func _perform_jump() -> void:
-	velocity.y = config.jump_velocity if config else -650.0
+	velocity.y = (config.jump_velocity if config else -650.0) * 1.15
 	is_jump_held = true
 	jump_hold_time = 0.0
 	_air_time = AIR_THRESHOLD + 0.01
@@ -499,7 +499,7 @@ func _perform_jump() -> void:
 
 func _perform_double_jump() -> void:
 	has_double_jumped = true
-	velocity.y = (config.jump_velocity if config else -650.0) * 0.75
+	velocity.y = (config.jump_velocity if config else -650.0) * 0.9
 	is_jump_held = true
 	jump_hold_time = 0.0
 	_change_state(GlobalDefine.PlayerState.JUMP)

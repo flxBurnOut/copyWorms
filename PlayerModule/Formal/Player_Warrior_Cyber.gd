@@ -202,7 +202,7 @@ func _release_skill() -> void:
 			var spread_angle = deg_to_rad(-30 + i * (60.0 / max(count - 1, 1))) if count > 1 else 0.0
 			var dir = base_dir.rotated(spread_angle)
 			projectile.global_position = global_position + Vector2(facing_dir * 25, -10) + Vector2(0, (i - (count - 1) / 2.0) * 8)
-			projectile.setup_homing(dir, 20, self, 600.0, true)
+			projectile.setup_homing(dir, 20 - 1, self, 600.0, true)
 	# 扇形电弧视觉
 	_spawn_arc_effect(Vector2(facing_dir, -0.2).normalized(), facing_dir)
 	# 震屏

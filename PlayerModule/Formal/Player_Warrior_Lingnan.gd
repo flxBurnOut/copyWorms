@@ -48,6 +48,11 @@ var _spin_range: float = 80.0
 var _spin_damage: int = 20
 var _spin_hit_enemies: Array = []     # 每段独立防重复
 
+# ---- 蓄力减伤 + 吸附 ----
+const CHARGE_DAMAGE_REDUCTION: float = 0.5   # 蓄力期间受伤减半
+const SUCK_RANGE: float = 500.0              # 吸附范围
+const SUCK_FORCE: float = 800.0              # 吸附力
+
 func _on_ready():
 	super._on_ready()
 	_anim_map = {
@@ -139,6 +144,9 @@ func _on_physics_process(delta: float) -> void:
 				_anim_sprite.modulate = Color(2, 2, 2, 1)
 		if _anim_sprite and _anim_sprite.modulate != Color.WHITE:
 			_anim_sprite.modulate = _anim_sprite.modulate.lerp(Color.WHITE, delta * 10)
+
+		# 蓄力期间吸附周围敌人
+		_suck_enemies(delta)
 
 		# 超过最大蓄力时间自动释放大回旋斩
 		if _charge_time >= CHARGE_MAX_TIME:
@@ -390,6 +398,28 @@ func _on_game_action(action: StringName, _event: InputEvent) -> void:
 	if _is_charging or _is_dashing_attack or _is_spinning or _dash_windup:
 		return  # 技能执行中不接受其他操作
 	super._on_game_action(action, _event)
+
+# ---- 蓄力期间减伤 ----
+
+func take_damage(damage: int, knockback_dir: Vector2 = Vector2.ZERO) -> void:
+	# 蓄力期间减伤50%
+	if _is_charging:
+		damage = max(1, int(round(damage * CHARGE_DAMAGE_REDUCTION)))
+	super.take_damage(damage, knockback_dir)
+
+# ---- 蓄力期间吸附周围敌人 ----
+
+func _suck_enemies(delta: float) -> void:
+	for enemy in GameManager.get_enemies():
+		if not is_instance_valid(enemy):
+			continue
+		var dist = global_position.distance_to(enemy.global_position)
+		if dist < SUCK_RANGE and dist > 10.0:
+			var suck_dir = (global_position - enemy.global_position).normalized()
+			# 吸附力随距离衰减（越近吸力越小，避免抖动）
+			var strength = SUCK_FORCE * clampf(1.0 - dist / SUCK_RANGE, 0.2, 1.0)
+			enemy.velocity.x = move_toward(enemy.velocity.x, suck_dir.x * strength, strength * delta * 10.0)
+			enemy.velocity.y = move_toward(enemy.velocity.y, suck_dir.y * strength * 0.5, strength * delta * 5.0)
 
 # ---- 死亡时清理技能状态 ----
 func _on_die() -> void:

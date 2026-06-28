@@ -5,8 +5,8 @@
 [ext_resource type="Resource" path="res://DataConfig/Level/Level04Data.tres" id="3_data"]
 [ext_resource type="PackedScene" path="res://LevelModule/Scenes/PixelworkMapStitch/Level04_Cyber/Level04_Cyber.tscn" id="4_cyber_bg"]
 [ext_resource type="PackedScene" path="res://LevelModule/Scenes/PixelworkMapStitch/Level04_Lingnan/Level04_Lingnan.tscn" id="5_lingnan_bg"]
-[ext_resource type="Script" uid="uid://bwdmt74rhc8ng" path="res://LevelModule/Formal/Ladder.gd" id="6_ladder"]
-[ext_resource type="Script" uid="uid://b8ncuf7p5o5rh" path="res://LevelModule/Formal/InteractiveObject.gd" id="7_intobj"]
+[ext_resource type="Script" uid="uid://dn1w0dycye66l" path="res://LevelModule/Formal/Ladder.gd" id="6_ladder"]
+[ext_resource type="Script" uid="uid://btk2x8ndpffig" path="res://LevelModule/Formal/InteractiveObject.gd" id="7_intobj"]
 [ext_resource type="Texture2D" uid="uid://b1pu2nwt2bwty" path="res://LevelModule/Scenes/PixelworkMapStitch/Level04_Cyber/images/overall/bg 2-2.png" id="8_cyber_bg2"]
 [ext_resource type="Texture2D" uid="uid://b0m20k3h0fvgf" path="res://LevelModule/Scenes/PixelworkMapStitch/Level04_Lingnan/images/overall/bg 2-1.png" id="9_lingnan_bg2"]
 
@@ -209,10 +209,10 @@ size = Vector2(797, 25)
 size = Vector2(216, 25)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rtua0"]
-size = Vector2(39.25, 488.75)
+size = Vector2(36.5, 412.75)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_y2mcw"]
-size = Vector2(30.5, 697.5)
+size = Vector2(30.5, 686.5)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ei20x"]
 size = Vector2(24, 100)
@@ -272,7 +272,6 @@ shape = SubResource("r3")
 position = Vector2(1537, 193)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Stage1Collisions/P_Y190_R" unique_id=981458435]
-position = Vector2(-1, 15)
 shape = SubResource("r4")
 
 [node name="P_Ym164" type="StaticBody2D" parent="Stage1Collisions" unique_id=38951055]
@@ -933,13 +932,13 @@ shape = SubResource("s2c_16")
 [node name="StaticBody2D4" type="StaticBody2D" parent="." unique_id=1027745032]
 
 [node name="CollisionShape2D4" type="CollisionShape2D" parent="StaticBody2D4" unique_id=1818250480]
-position = Vector2(3371.625, 1068.375)
+position = Vector2(3373, 1106.375)
 shape = SubResource("RectangleShape2D_rtua0")
 
 [node name="StaticBody2D3" type="StaticBody2D" parent="." unique_id=1269717418]
 
 [node name="CollisionShape2D3" type="CollisionShape2D" parent="StaticBody2D3" unique_id=935973169]
-position = Vector2(772, 1244.75)
+position = Vector2(772, 1250.25)
 shape = SubResource("RectangleShape2D_y2mcw")
 
 [node name="StaticBody2D2" type="StaticBody2D" parent="." unique_id=1302876374]

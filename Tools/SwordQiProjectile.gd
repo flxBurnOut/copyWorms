@@ -16,6 +16,8 @@ var _traveled: float = 0.0
 var _hit_enemies: Array = []  # 已命中敌人ID，防止重复
 var _owner: Node2D = null
 var _homing: bool = false  # 是否追踪（仅Boss战特定弹体启用）
+var _homing_delay: float = 0.0  # 追踪延迟（先沿散射方向飞行，延迟结束后才追踪）
+const HOMING_DELAY_TIME: float = 0.25  # 散射飞行0.25秒后才开始追踪
 
 # 视觉
 var _trail_line: Line2D = null
@@ -73,10 +75,14 @@ func setup(dir: Vector2, dmg: int, owner: Node2D, dist: float = 350.0) -> void:
 func setup_homing(dir: Vector2, dmg: int, owner: Node2D, dist: float = 350.0, homing: bool = false) -> void:
 	setup(dir, dmg, owner, dist)
 	_homing = homing
+	if homing:
+		_homing_delay = HOMING_DELAY_TIME  # 先散射飞行，延迟后才追踪
 
 func _physics_process(delta: float) -> void:
-	# 仅追踪弹体（_homing=true）才追踪 boss_target
-	if _homing and GameManager.boss_target and is_instance_valid(GameManager.boss_target):
+	# 追踪逻辑：延迟结束后才开始追踪（保留散射效果）
+	if _homing and _homing_delay > 0:
+		_homing_delay -= delta
+	elif _homing and GameManager.boss_target and is_instance_valid(GameManager.boss_target):
 		var to_boss = GameManager.boss_target.global_position - global_position
 		if to_boss.length() > 10:
 			direction = to_boss.normalized()

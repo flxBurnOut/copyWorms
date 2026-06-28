@@ -125,7 +125,6 @@ func _setup_player() -> void:
 func _swap_player_skin(skin: String) -> void:
 	var old = GameManager.player_ref
 	if not old or not is_instance_valid(old): return
-	GameUIStyle.set_ui_theme(GameUIStyle.UI_THEME_LINGNAN if skin == "Lingnan" else GameUIStyle.UI_THEME_CYBER)
 	var h = old.current_health; var m = old.max_health
 	var f = old.is_facing_right; var pos = old.global_position
 	# 先断开旧玩家信号
@@ -157,7 +156,6 @@ func _swap_player_skin(skin: String) -> void:
 
 func _on_ready() -> void:
 	super._on_ready()
-	GameUIStyle.set_ui_theme(GameUIStyle.UI_THEME_CYBER)
 	# 入场黑屏遮罩（初始化在黑屏下进行，末尾淡出呈现关卡）
 	_play_intro_fade_in()
 	if not level_config: level_config = load("res://DataConfig/Level/Level04Config.tres") as LevelConfig; _apply_config()
@@ -534,29 +532,16 @@ func _freeze_player(f: bool) -> void:
 func _show_narrative(text: String, cb: Callable = Callable()) -> void:
 	InputManager.block_input("叙事面板", self)
 	if _narrative_open: _narrative_panel.hide(); _narrative_open = false
-	_is_interacting = true; _narrative_open = true; _freeze_player(true)
-	var pages := GameUIStyle.paginate_interaction_text(text)
-	var page_index := 0
-	if _narrative_panel:
-		if _narrative_text:
-			GameUIStyle.fit_interaction_text_panel(_narrative_panel, _narrative_text, pages[page_index])
-		_narrative_panel.show()
+	_is_interacting = true; _narrative_open = true; GameManager.is_dialog_active = true; _freeze_player(true)
+	if _narrative_panel: _narrative_panel.show(); _narrative_text.text = text
 	await get_tree().create_timer(0.3).timeout
 	_narrative_enter_pressed = false
 	var w: float = 0.0
 	while _narrative_open and w < NARRATIVE_INPUT_TIMEOUT:
-		if _narrative_enter_pressed:
-			if page_index < pages.size() - 1:
-				page_index += 1
-				_narrative_enter_pressed = false
-				w = 0.0
-				if _narrative_panel and _narrative_text:
-					GameUIStyle.fit_interaction_text_panel(_narrative_panel, _narrative_text, pages[page_index])
-			else:
-				break
+		if _narrative_enter_pressed: break
 		await get_tree().create_timer(0.05).timeout; w += 0.05
 	_narrative_panel.hide(); _freeze_player(false)
-	_narrative_open = false; _is_interacting = false
+	_narrative_open = false; GameManager.is_dialog_active = false; _is_interacting = false
 	InputManager.unblock_input("叙事面板")
 	if cb.is_valid(): cb.call()
 
@@ -570,24 +555,25 @@ func _on_combat_hit(data: Dictionary) -> void:
 	if _hurt_swap_pending: return
 	if _swap_cooldown > 0.0: return
 	_swap_cooldown = 0.8
+	# 玩家受击：延迟切换（先播放受击反馈）
 	if data.has("current_health"):
 		if int(data.get("current_health", 1)) <= 0:
-			return
+			return  # 玩家死亡不切换
 		var hurt_player = data.get("player", GameManager.player_ref)
 		if hurt_player and is_instance_valid(hurt_player):
 			_prime_hurt_feedback_before_swap(hurt_player)
 		_hurt_swap_pending = true
 		await get_tree().create_timer(HURT_SWAP_DELAY).timeout
 		_hurt_swap_pending = false
+		# await 后重新检查状态（期间可能进入stage2/对话/死亡）
 		if current_state != LevelState.HOMOMORPHIC_COMBAT: return
 		if _stage2_entered: return
-		if _narrative_open or _is_interacting: return
+		if _narrative_open: return
 		if GameManager.is_game_over: return
 		var p = GameManager.player_ref
 		if not p or not is_instance_valid(p): return
-	_is_interacting = true
+	# 执行世界切换
 	_swap_world()
-	_is_interacting = false
 
 
 func _prime_hurt_feedback_before_swap(player: Node) -> void:
@@ -833,10 +819,8 @@ func _stop_stage2_alarm() -> void:
 # ============================================================
 
 func _build_erosion_ui() -> void:
-	var hud = get_node_or_null("HUD")
-	if not hud:
-		call_deferred("_build_erosion_ui")
-		return
+	var cv = get_node_or_null("CanvasLayerUI")
+	if not cv: return
 
 	# ---- 侵蚀进度条容器 ----
 	var container = Control.new()
@@ -844,7 +828,8 @@ func _build_erosion_ui() -> void:
 	container.position = Vector2(20, 105)
 	container.size = Vector2(280, 28)
 	container.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	hud.add_child(container)
+	container.z_index = 130
+	cv.add_child(container)
 
 	# 背景
 	_erosion_bar_bg = ColorRect.new()
@@ -889,12 +874,17 @@ func _build_erosion_ui() -> void:
 		mat.shader = shader
 		mat.set_shader_parameter("intensity", 0.0)
 		_erosion_vignette.material = mat
-	var cv = get_node_or_null("CanvasLayerUI")
-	if cv:
-		cv.add_child(_erosion_vignette)
+	cv.add_child(_erosion_vignette)
 
 func _update_erosion_ui() -> void:
 	if not _erosion_bar_fill or not _erosion_label: return
+	# 确保侵蚀条始终可见（防止世界切换等操作意外隐藏）
+	var container = _erosion_bar_fill.get_parent()
+	if container and is_instance_valid(container):
+		container.visible = true
+	if _erosion_bar_bg: _erosion_bar_bg.visible = true
+	_erosion_bar_fill.visible = true
+	_erosion_label.visible = true
 	var ratio: float = _erosion_value / EROSION_MAX
 	_erosion_bar_fill.size.x = 280.0 * ratio
 	_erosion_label.text = "侵蚀 %.0f%%" % _erosion_value
@@ -915,10 +905,13 @@ func _modify_erosion(delta: float) -> void:
 	_erosion_value = clampf(_erosion_value + delta, 0.0, EROSION_MAX)
 	_update_erosion_ui()
 	if _erosion_value >= EROSION_MAX:
-		# 侵蚀满 → 直接失败
+		# 侵蚀满 → 播放死亡动画后再触发失败
 		_stage2_auto_swap = false
 		_stop_stage2_warning()
 		print("[Level_04] 侵蚀值已满！世界崩溃……")
+		var p = GameManager.player_ref
+		if p and is_instance_valid(p) and p.current_state != GlobalDefine.PlayerState.DEAD:
+			p.die()
 		GameManager.trigger_game_over()
 
 
@@ -1166,7 +1159,10 @@ func _flash_screen() -> void:
 		_glitch_overlay.show()
 		var m = _glitch_overlay.material as ShaderMaterial
 		m.set_shader_parameter("intensity", strength)
-		create_tween().tween_property(m, "shader_parameter/intensity", 0.0, duration)
+		var gt = create_tween()
+		gt.tween_property(m, "shader_parameter/intensity", 0.0, duration)
+		# glitch淡出后隐藏覆盖层，防止全屏覆盖层遮挡侵蚀条等UI
+		gt.tween_callback(func(): if _glitch_overlay: _glitch_overlay.hide())
 
 	var f = ColorRect.new()
 	f.name = "SwapFlash"; f.set_anchors_preset(Control.PRESET_FULL_RECT)

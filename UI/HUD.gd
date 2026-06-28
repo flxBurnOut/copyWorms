@@ -14,7 +14,6 @@ var _pause_code_rain_overlay: CodeRain = null
 var _health_frame: TextureRect = null   # 血条外框
 var _health_frame_lingnan: Texture2D = null
 var _health_frame_cyber: Texture2D = null
-var _panel_buttons: Array[TextureButton] = []
 
 # ---- 技能冷却UI ----
 var _skill_icon_container: Control = null   # 技能图标容器（右下角）
@@ -478,7 +477,6 @@ func _update_health_frame() -> void:
 	_health_frame.texture = tex
 
 func _on_game_pause(_data: Dictionary = {}) -> void:
-	_refresh_panel_buttons()
 	pause_panel.show()
 	_start_pause_code_rain_if_needed()
 
@@ -487,7 +485,6 @@ func _on_game_resume(_data: Dictionary = {}) -> void:
 	pause_panel.hide()
 
 func _on_game_over(_data: Dictionary = {}) -> void:
-	_refresh_panel_buttons()
 	game_over_panel.show()
 
 # ---- 按钮回调 ----
@@ -552,17 +549,10 @@ func _stop_pause_code_rain(immediate: bool = false) -> void:
 		_pause_code_rain_overlay.stop_rain(immediate)
 
 func _is_code_rain_pause_scene() -> bool:
-	if not GameUIStyle.is_cyber_theme():
-		return false
 	var scene = get_tree().current_scene
 	if not scene:
 		return false
 	return scene is Level_03 or scene is Level_04 or scene is Level_05
-
-func _refresh_panel_buttons() -> void:
-	for button in _panel_buttons:
-		if button and is_instance_valid(button):
-			GameUIStyle.refresh_texture_button(button)
 
 ## 创建统一梦境赛博皮肤按钮（暂停面板等局内UI共用）
 func _make_panel_btn(text: String, pos: Vector2, size: Vector2, font_size: int = 24) -> TextureButton:
@@ -578,5 +568,4 @@ func _make_panel_btn(text: String, pos: Vector2, size: Vector2, font_size: int =
 	btn.add_child(lbl)
 	GameUIStyle.apply_texture_button(btn, font_size)
 	btn.pressed.connect(func() -> void: SFXManager.play(SFXManager.SFX.UI_CLICK))
-	_panel_buttons.append(btn)
 	return btn

@@ -10,5 +10,6 @@ void fragment() {
 	// 以 0.5 为中心做对比度拉伸
 	c.rgb = (c.rgb - 0.5) * contrast + 0.5;
 	c.rgb = clamp(c.rgb, 0.0, 1.0);
-	COLOR = c;
+	// 保留父节点 modulate（LV02_03 影灯笼怪 modulate=Color(0,0,0,0.9) 才能生效）
+	COLOR = c * COLOR;
 }

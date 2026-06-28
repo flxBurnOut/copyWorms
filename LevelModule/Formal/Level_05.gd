@@ -92,7 +92,6 @@ func _setup_player() -> void:
 
 	var path = "res://PlayerModule/Formal/Player_Warrior_Cyber.tscn"
 	if ResourceLoader.exists(path):
-		GameUIStyle.set_ui_theme(GameUIStyle.UI_THEME_CYBER)
 		var p = load(path).instantiate()
 		p.position = Vector2(-1603, 380)
 		_current_player_skin = "Cyber"
@@ -121,7 +120,6 @@ func _setup_player() -> void:
 func _swap_player_skin(skin: String) -> void:
 	var old = GameManager.player_ref
 	if not old or not is_instance_valid(old): return
-	GameUIStyle.set_ui_theme(GameUIStyle.UI_THEME_LINGNAN if skin == "Lingnan" else GameUIStyle.UI_THEME_CYBER)
 	# 保存旧角色的血量到对应变量（双角色独立血量，切人不回满）
 	if _current_player_skin == "Cyber":
 		_cyber_health = old.current_health
@@ -216,7 +214,6 @@ func _set_cam_from_group(group: Node, top: int, bottom: int = -1) -> void:
 
 func _on_ready() -> void:
 	super._on_ready()
-	GameUIStyle.set_ui_theme(GameUIStyle.UI_THEME_CYBER)
 
 	# 入场黑屏遮罩（初始化在黑屏下进行，末尾淡出呈现关卡）
 	_play_intro_fade_in()
@@ -502,6 +499,8 @@ func _process(delta: float) -> void:
 			if pp.can_attack_hold_dash: pp.can_attack_hold_dash = false
 
 func _input(event: InputEvent) -> void:
+	# 玩家死亡后禁止所有交互输入
+	if GameManager.is_game_over: return
 	# 鼠标左键等价于Enter（对话推进/交互触发）
 	var is_left_click: bool = event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT
 	# 对话框打开时，Enter或左键推进对话
@@ -542,7 +541,6 @@ func _input(event: InputEvent) -> void:
 func _swap_world_layer() -> void:
 	_top_is_lingnan = not _top_is_lingnan
 	if _top_is_lingnan:
-		GameUIStyle.set_ui_theme(GameUIStyle.UI_THEME_CYBER)
 		_top_sprite.texture = load("res://LevelModule/Scenes/PixelworkMapStitch/Level05_Lingnan/bg 3-2.png")
 		_top_sprite.scale = Vector2(1.6, 1.6)
 		_bot_sprite.texture = load("res://LevelModule/Scenes/PixelworkMapStitch/Level05_Cyber/bg 3-1.png")
@@ -553,7 +551,6 @@ func _swap_world_layer() -> void:
 		_show_enemy_group(_lingnan_enemies, true)
 		_show_enemy_group(_cyber_enemies, false)
 	else:
-		GameUIStyle.set_ui_theme(GameUIStyle.UI_THEME_LINGNAN)
 		_top_sprite.texture = load("res://LevelModule/Scenes/PixelworkMapStitch/Level05_Cyber/bg 3-1.png")
 		_top_sprite.scale = Vector2(0.8, 0.8)
 		_bot_sprite.texture = load("res://LevelModule/Scenes/PixelworkMapStitch/Level05_Lingnan/bg 3-2.png")
@@ -866,7 +863,6 @@ func _update_lantern_prompt() -> void:
 func _teleport_to_bg5() -> void:
 	_in_boss_arena = false
 	_in_bg5 = true
-	GameUIStyle.set_ui_theme(GameUIStyle.UI_THEME_CYBER)
 	if _current_player_skin != "Cyber":
 		_swap_player_skin("Cyber")
 	_set_boss_area_active(false)
@@ -1001,6 +997,21 @@ func _check_low_hp_hint(skin: String, hp: int) -> void:
 		return
 	_show_skin_hint()
 
+## 双血条各回血（Boss召唤小怪全灭奖励）
+func _heal_dual_char(amount: int) -> void:
+	_cyber_health = mini(_cyber_health + amount, DUAL_CHAR_MAX_HP)
+	_lingnan_health = mini(_lingnan_health + amount, DUAL_CHAR_MAX_HP)
+	# 当前角色实时回血
+	var p = GameManager.player_ref
+	if p and is_instance_valid(p):
+		p.current_health = _cyber_health if _current_player_skin == "Cyber" else _lingnan_health
+		EventBus.emit(GlobalDefine.EventName.HEALTH_CHANGED, {
+			"target": p,
+			"current_health": p.current_health,
+			"max_health": p.max_health
+		})
+	print("[Level_05] 双血条各回血 %d (Cyber=%d, Lingnan=%d)" % [amount, _cyber_health, _lingnan_health])
+
 func _spawn_all_enemies(lingnan_on_top: bool) -> void:
 	_clear_all_enemies()
 
@@ -1054,6 +1065,7 @@ func _build_erosion_bar() -> void:
 	bar.name = "ErosionBar"
 	bar.position = Vector2(20, 105); bar.size = Vector2(280, 28)
 	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bar.z_index = 130
 	hud.add_child(bar)
 
 	_erosion_bar_bg = ColorRect.new()
@@ -1092,6 +1104,9 @@ func _modify_erosion(delta: float) -> void:
 	_update_erosion_bar()
 	if _erosion_value >= EROSION_MAX:
 		print("[Level_05] 侵蚀值已满！")
+		var p = GameManager.player_ref
+		if p and is_instance_valid(p) and p.current_state != GlobalDefine.PlayerState.DEAD:
+			p.die()
 		GameManager.trigger_game_over()
 
 func _on_enemy_died(data: Dictionary) -> void:
@@ -1104,7 +1119,8 @@ func _on_enemy_died(data: Dictionary) -> void:
 		_cyber_enemies.erase(e)
 	# Boss 死亡处理
 	if e == _boss_instance:
-		var death_pos: Vector2 = e.global_position
+		# 灯笼生成位置：X用Boss位置，Y在5000~5077之间随机（地面高度区间）
+		var death_pos: Vector2 = Vector2(e.global_position.x, randf_range(5000.0, 5077.0))
 		_hide_boss_bar()
 		GameManager.boss_target = null
 		_boss_instance = null
@@ -1172,17 +1188,16 @@ func _set_map_sprites_visible(v: bool) -> void:
 # ============================================================
 
 func _show_dialog(lines: Array[String], callback: Callable = Callable()) -> void:
-	_dialog_lines.clear()
-	for line in lines:
-		_dialog_lines.append_array(GameUIStyle.paginate_interaction_text(str(line)))
+	_dialog_lines = lines
 	_dialog_index = 0
 	_dialog_callback = callback
 	_dialog_open = true
+	GameManager.is_dialog_active = true
 	InputManager.block_input("对话", self)
 	if not _dialog_panel:
 		_create_dialog_panel()
-	_show_dialog_line()
 	_dialog_panel.visible = true
+	_show_dialog_line()
 
 func _create_dialog_panel() -> void:
 	var cv = get_node_or_null("CanvasLayer")
@@ -1190,8 +1205,6 @@ func _create_dialog_panel() -> void:
 	_dialog_panel = Panel.new()
 	_dialog_panel.name = "DialogPanel"
 	_dialog_panel.visible = false
-	_dialog_panel.set_meta("dialog_visual_style", "theme")
-	_dialog_panel.set_meta("dialog_preferred_zone", "bottom")
 	_dialog_panel.anchor_left = 0.0
 	_dialog_panel.anchor_top = 1.0
 	_dialog_panel.anchor_right = 1.0
@@ -1202,17 +1215,34 @@ func _create_dialog_panel() -> void:
 	_dialog_panel.offset_bottom = 0.0
 	_dialog_panel.z_index = 200
 	_dialog_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# 仿照前三关 NarrativePanel 样式：纯黑半透背景 + 圆角，无紫色边框
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0, 0, 0, 0.85)
+	style.set_corner_radius_all(8)
+	_dialog_panel.add_theme_stylebox_override("panel", style)
 	cv.add_child(_dialog_panel)
 
 	_dialog_label = RichTextLabel.new()
 	_dialog_label.name = "RichTextLabel"
+	_dialog_label.anchor_left = 0.0
+	_dialog_label.anchor_top = 0.0
+	_dialog_label.anchor_right = 1.0
+	_dialog_label.anchor_bottom = 1.0
+	_dialog_label.offset_left = 20.0
+	_dialog_label.offset_top = 20.0
+	_dialog_label.offset_right = -20.0
+	_dialog_label.offset_bottom = -20.0
+	_dialog_label.bbcode_enabled = true
+	_dialog_label.fit_content = true
+	_dialog_label.add_theme_font_size_override("normal_font_size", 27)
+	# 仿照前三关：暖色调文字（0.9, 0.85, 0.75），非纯白
+	_dialog_label.add_theme_color_override("default_color", Color(0.9, 0.85, 0.75))
+	_dialog_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_dialog_panel.add_child(_dialog_label)
-	GameUIStyle.apply_interaction_text_panel(_dialog_panel, _dialog_label, 27)
 
 func _show_dialog_line() -> void:
 	if _dialog_index < _dialog_lines.size():
-		if _dialog_panel and _dialog_label:
-			GameUIStyle.fit_interaction_text_panel(_dialog_panel, _dialog_label, _dialog_lines[_dialog_index])
+		_dialog_label.text = _dialog_lines[_dialog_index]
 	else:
 		_close_dialog()
 
@@ -1222,6 +1252,7 @@ func _advance_dialog() -> void:
 
 func _close_dialog() -> void:
 	_dialog_open = false
+	GameManager.is_dialog_active = false
 	_dialog_panel.visible = false
 	_dialog_close_cooldown = 0.4  # 关闭后0.4秒内不检测交互，防Enter串扰
 	InputManager.unblock_input("对话")

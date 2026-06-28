@@ -146,7 +146,6 @@ func _get_spawn_position() -> Vector2:
 
 func _on_ready() -> void:
 	super._on_ready()
-	GameUIStyle.set_ui_theme(GameUIStyle.UI_THEME_LINGNAN)
 
 	if not level_config:
 		level_config = load("res://DataConfig/Level/Level02Config.tres") as LevelConfig
@@ -1328,11 +1327,20 @@ func _build_all_ui() -> void:
 	_narrative_panel.offset_left = 0.0; _narrative_panel.offset_top = -200.0
 	_narrative_panel.offset_right = 0.0; _narrative_panel.offset_bottom = 0.0
 	_narrative_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var nstyle = StyleBoxFlat.new()
+	nstyle.bg_color = Color(0, 0, 0, 0.85); nstyle.set_corner_radius_all(8)
+	_narrative_panel.add_theme_stylebox_override("panel", nstyle)
 	canvas.add_child(_narrative_panel)
 	_narrative_text = RichTextLabel.new()
 	_narrative_text.name = "NarrativeText"
+	_narrative_text.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_narrative_text.offset_left = 20.0; _narrative_text.offset_top = 20.0
+	_narrative_text.offset_right = -20.0; _narrative_text.offset_bottom = -20.0
+	_narrative_text.bbcode_enabled = true; _narrative_text.fit_content = true
+	_narrative_text.add_theme_font_size_override("normal_font_size", 27)
+	_narrative_text.add_theme_color_override("default_color", Color(0.9, 0.85, 0.75))
+	_narrative_text.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_narrative_panel.add_child(_narrative_text)
-	GameUIStyle.apply_interaction_text_panel(_narrative_panel, _narrative_text, 27)
 
 	# 红光遮罩
 	_red_overlay = ColorRect.new()
@@ -1592,9 +1600,9 @@ func _build_all_ui() -> void:
 		_config_ui.add_child(fb); _config_feedback_labels.append(fb)
 	_recompile_button = Button.new()
 	_recompile_button.name = "RecompileButton"; _recompile_button.text = "重新编译并注入梦境"
-	_recompile_button.disabled = true; _recompile_button.position = Vector2(270, 380)
-	_recompile_button.size = Vector2(300, 48)
-	GameUIStyle.apply_code_button(_recompile_button, 23)
+	_recompile_button.disabled = true; _recompile_button.position = Vector2(270, 358)
+	_recompile_button.size = Vector2(300, 90)
+	GameUIStyle.apply_button(_recompile_button, 24)
 	_config_ui.add_child(_recompile_button)
 	canvas.add_child(_config_ui)
 
@@ -1631,25 +1639,15 @@ func _show_narrative(text: String, callback: Callable = Callable()) -> void:
 	_is_interacting = true
 	_narrative_open = true
 	_freeze_player(true)
-	var pages := GameUIStyle.paginate_interaction_text(text)
-	var page_index := 0
 	if _narrative_panel:
-		if _narrative_text:
-			GameUIStyle.fit_interaction_text_panel(_narrative_panel, _narrative_text, pages[page_index])
 		_narrative_panel.show()
+		if _narrative_text: _narrative_text.text = text
 	await get_tree().create_timer(0.3).timeout
 	_narrative_enter_pressed = false
 	var elapsed: float = 0.0
 	while _narrative_open and elapsed < NARRATIVE_INPUT_TIMEOUT:
 		if _narrative_enter_pressed:
-			if page_index < pages.size() - 1:
-				page_index += 1
-				_narrative_enter_pressed = false
-				elapsed = 0.0
-				if _narrative_panel and _narrative_text:
-					GameUIStyle.fit_interaction_text_panel(_narrative_panel, _narrative_text, pages[page_index])
-			else:
-				break
+			break
 		await get_tree().create_timer(0.05).timeout
 		elapsed += 0.05
 	if _narrative_panel: _narrative_panel.hide()

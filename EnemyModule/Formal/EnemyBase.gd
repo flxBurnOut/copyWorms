@@ -123,6 +123,10 @@ func _apply_gravity(delta: float) -> void:
 		velocity.y += grav * delta
 
 func _update_target() -> void:
+	# 对话/叙事期间不锁定玩家
+	if GameManager.is_dialog_active:
+		target = null
+		return
 	# 通过GM获取玩家引用，不直接引用节点
 	target = GameManager.player_ref
 	if target and not is_instance_valid(target):
@@ -285,6 +289,9 @@ func _change_state(new_state: int) -> void:
 
 func _can_detect_target() -> bool:
 	if not target or not is_instance_valid(target):
+		return false
+	# 对话/叙事期间敌人不可锁定玩家
+	if GameManager.is_dialog_active:
 		return false
 	var detect_range = config.detect_range if config else 300.0
 	return global_position.distance_to(target.global_position) <= detect_range
